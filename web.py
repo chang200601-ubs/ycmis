@@ -14,6 +14,7 @@ def index():
     link+="<a href=/me>我的網頁</a><br><hr>"
     link+="<a href=/welcome?u=ycc&d=靜宜資管&c=資訊管理導論>Get傳值</a><br><hr>"
     link+="<a href=/account>POST傳值</a><br><hr>"
+    link+="<a href=/count>次方與根號計算</a><br><hr>"    
 
 
     return link
