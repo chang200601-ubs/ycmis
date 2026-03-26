@@ -49,6 +49,9 @@ def account():
         return result
     else:
         return render_template("account.html")
+@app.route("/count")
+def count():
+    return render_template("count.html")        
 
 
 if __name__ == "__main__":
