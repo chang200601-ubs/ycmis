@@ -1,70 +1,69 @@
-from flask import Flask, render_template
-from datetime import datetime
-
 import os
 import json
 import firebase_admin
 from firebase_admin import credentials, firestore
+from flask import Flask, render_template, request
+from datetime import datetime
 
-# 判斷是在 Vercel 還是本地
-if os.path.exists('serviceAccountKey.json'):
-    # 本地環境：讀取檔案
-    cred = credentials.Certificate('serviceAccountKey.json')
-else:
-    # 雲端環境：從環境變數讀取 JSON 字串
-    firebase_config = os.getenv('FIREBASE_CONFIG')
-    cred_dict = json.loads(firebase_config)
-    cred = credentials.Certificate(cred_dict)
+# 1. Firebase 初始化 (只做一次)
+if not firebase_admin._apps:
+    if os.path.exists('serviceAccountKey.json'):
+        # 本地環境
+        cred = credentials.Certificate('serviceAccountKey.json')
+    else:
+        # 雲端環境 (Vercel)
+        firebase_config = os.getenv('FIREBASE_CONFIG')
+        if firebase_config:
+            cred_dict = json.loads(firebase_config)
+            cred = credentials.Certificate(cred_dict)
+        else:
+            raise ValueError("找不到 Firebase 設定！")
+    firebase_admin.initialize_app(cred)
 
-firebase_admin.initialize_app(cred)
+db = firestore.client()
 
-
+# 2. Flask 初始化
 app = Flask(__name__)
 
-
-app = Flask(__name__)
+# --- 路由設定 ---
 
 @app.route("/")
 def index():
-    link= "<h1>張伊傑Python網頁20260409</h1>"
-    link+="<a href=/mis>課程</a><br><hr>"
-    link+="<a href=/today>今天日期時間</a><br><hr>"
-    link+="<a href=/me>我的網頁</a><br><hr>"
-    link+="<a href=/welcome?u=ycc&d=靜宜資管&c=資訊管理導論>Get傳值</a><br><hr>"
-    link+="<a href=/account>POST傳值</a><br><hr>"
-    link+="<a href=/count>次方與根號計算</a><br><hr>"   
-    link+="<a href=/read>讀取Firestore資料</a><hr>" 
-    link+="<a href=/read2>讀取Firestore資料(關鍵字)</a><hr>" 
-
+    link = "<h1>張伊傑Python網頁20260409</h1>"
+    link += "<a href=/mis>課程</a><br><hr>"
+    link += "<a href=/today>今天日期時間</a><br><hr>"
+    link += "<a href=/me>我的網頁</a><br><hr>"
+    link += "<a href=/welcome?u=ycc&d=靜宜資管&c=資訊管理導論>Get傳值</a><br><hr>"
+    link += "<a href=/account>POST傳值</a><br><hr>"
+    link += "<a href=/count>次方與根號計算</a><br><hr>"   
+    link += "<a href=/read>讀取Firestore資料</a><hr>" 
+    link += "<a href=/read2>讀取Firestore資料(關鍵字)</a><hr>" 
+    link += "<a href=/find>找老師</a><hr>" 
     return link
+
 
 @app.route("/read2")
 def read2():
     Result = ""
-    keyword="楊"
-    db = firestore.client()
+    keyword = "楊"
     collection_ref = db.collection("靜宜資管")    
     docs = collection_ref.get()    
     for doc in docs: 
-        teacher=doc.to_dict()
-        if keyword in teacher["name"]:        
-            Result += str(doc.to_dict()) + "<br>" 
-
-    if Result=="":
-        Result="查無資料"
-    return Result
-
+        teacher = doc.to_dict()
+        if keyword in teacher.get("name", ""):        
+            Result += str(teacher) + "<br>" 
+    if Result == "":
+        Result = "查無資料"
+    return Result + "<br><a href=/>返回首頁</a>"
 
 @app.route("/read")
 def read():
     Result = ""
-    db = firestore.client()
     collection_ref = db.collection("靜宜資管")    
     docs = collection_ref.get()    
-    for doc in docs:         
+    for doc in docs:          
         Result += str(doc.to_dict()) + "<br>"    
-    return Result
-    
+    return Result + "<br><a href=/>返回首頁</a>"
 
 @app.route("/mis")
 def course():
@@ -83,23 +82,26 @@ def me():
 @app.route("/welcome", methods=["GET"])
 def welcome():
     user = request.values.get("u")
-    d= request.values.get("d")
-    c= request.values.get("c")   
-    return render_template("welcome.html", name=user,dep=d,course=c)
+    d = request.values.get("d")
+    c = request.values.get("c")   
+    return render_template("welcome.html", name=user, dep=d, course=c)
 
 @app.route("/account", methods=["GET", "POST"])
 def account():
     if request.method == "POST":
         user = request.form["user"]
         pwd = request.form["pwd"]
-        result = "您輸入的帳號是：" + user + "; 密碼為：" + pwd 
-        return result
-    else:
-        return render_template("account.html")
+        return "您輸入的帳號是：" + user + "；密碼為：" + pwd 
+    return render_template("account.html")
+
 @app.route("/count")
 def count():
-    return render_template("count.html")        
+    return render_template("count.html")
 
+@app.route("/find")
+def find():
+    return "<h1>找老師頁面</h1><p>這是尚未實作的功能</p><a href=/>返回首頁</a>"
 
-if __name__ == "__main__":
+# --- 啟動指令 (一定要有這段程式才會動) ---
+if __name__ == '__main__':
     app.run(debug=True)
