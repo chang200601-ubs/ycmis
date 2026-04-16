@@ -25,11 +25,9 @@ db = firestore.client()
 # 2. Flask 初始化
 app = Flask(__name__)
 
-# --- 路由設定 ---
-
 @app.route("/")
 def index():
-    link = "<h1>張伊傑Python網頁20260409</h1>"
+    link = "<h1>YCC的Python網頁</h1>"
     link += "<a href=/mis>課程</a><br><hr>"
     link += "<a href=/today>今天日期時間</a><br><hr>"
     link += "<a href=/me>我的網頁</a><br><hr>"
@@ -39,6 +37,7 @@ def index():
     link += "<a href=/read>讀取Firestore資料</a><hr>" 
     link += "<a href=/read2>讀取Firestore資料(關鍵字)</a><hr>" 
     link += "<a href=/find>找老師</a><hr>" 
+    link += "<a href=/teacher>老師本學期的課程</a><hr>" 
     return link
 
 
@@ -101,6 +100,13 @@ def count():
 @app.route("/find")
 def find():
     return "<h1>找老師頁面</h1><p>這是尚未實作的功能</p><a href=/>返回首頁</a>"
+
+@app.route("/teacher")
+def teacher():
+    return "<h1>老師本學期的課程</h1><p>這是尚未實作的功能</p><a href=/>返回首頁</a>"
+
+
+
 
 # --- 啟動指令 (一定要有這段程式才會動) ---
 if __name__ == '__main__':
