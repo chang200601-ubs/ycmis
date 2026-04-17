@@ -34,7 +34,7 @@ def index():
     link += "<a href=/count>次方與根號計算</a><br><hr>"   
     link += "<a href=/read>讀取Firestore資料</a><hr>" 
     link += "<a href=/read2>讀取Firestore資料(關鍵字)</a><hr>" 
-    link += "<a href=/find>找老師</a><hr>" 
+    link += "<a href=/search>找老師</a><hr>" 
     link += "<a href=/teacher>老師本學期的課程</a><hr>" 
     return link
 
