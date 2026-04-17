@@ -107,7 +107,7 @@ def search():
                 teacher = doc.to_dict()
                 if keyword in teacher.get("name", ""):
                     results.append(teacher)
-    return render_template("find.html", results=results, keyword=keyword)
+    return render_template("search.html", results=results, keyword=keyword)
 
 @app.route("/teacher")
 def teacher():
