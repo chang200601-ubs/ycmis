@@ -114,17 +114,27 @@ def teacher():
     import requests
     from bs4 import BeautifulSoup
 
-    url = "https://www1.pu.edu.tw/~tcyang/"
-    resp = requests.get(url, timeout=5)
-    resp.encoding = "utf-8"
-    soup = BeautifulSoup(resp.text, "html.parser")
+    url = "https://www1.pu.edu.tw/~tcyang/course.html"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"
+    }
+    
+    try:
+        resp = requests.get(url, headers=headers, timeout=10)
+        resp.encoding = "utf-8"
+        soup = BeautifulSoup(resp.text, "html.parser")
 
-    result = ""
-    for a in soup.select("a"):
-        href = a.get("href", "")
-        name = a.get_text(strip=True)
-        if "drive.google.com" in href:
-            result += name + href + "<br>"
+        result = ""
+        for a in soup.select("a"):
+            href = a.get("href", "")
+            name = a.get_text(strip=True)
+            if "drive.google.com" in href:
+                result += name + href + "<br>"
+
+        if result == "":
+            result = "抓不到課程資料"
+    except Exception as e:
+        result = "錯誤：" + str(e)
 
     return result + "<br><a href=/>返回首頁</a>"
 
