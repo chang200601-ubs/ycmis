@@ -95,7 +95,7 @@ def count():
     return render_template("count.html")
 
 @app.route("/search", methods=["GET", "POST"])
-def find():
+def search():
     results = []
     keyword = ""
     if request.method == "POST":
