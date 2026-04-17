@@ -111,7 +111,22 @@ def search():
 
 @app.route("/teacher")
 def teacher():
-    return "<h1>老師本學期的課程</h1><p>這是尚未實作的功能</p><a href=/>返回首頁</a>"
+    import requests
+    from bs4 import BeautifulSoup
+
+    url = "https://www1.pu.edu.tw/~tcyang/"
+    resp = requests.get(url, timeout=5)
+    resp.encoding = "utf-8"
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    result = ""
+    for a in soup.select("a"):
+        href = a.get("href", "")
+        name = a.get_text(strip=True)
+        if "drive.google.com" in href:
+            result += name + href + "<br>"
+
+    return result + "<br><a href=/>返回首頁</a>"
 
 if __name__ == '__main__':
     app.run(debug=True)
