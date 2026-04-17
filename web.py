@@ -5,7 +5,7 @@ from firebase_admin import credentials, firestore
 from flask import Flask, render_template, request
 from datetime import datetime
 
-# 1. Firebase 初始化 (只做一次)
+# 1. Firebase 初始化 (保持你原本的雲端/本地自動切換邏輯)
 if not firebase_admin._apps:
     if os.path.exists('serviceAccountKey.json'):
         # 本地環境
@@ -40,6 +40,7 @@ def index():
     link += "<a href=/teacher>老師本學期的課程</a><hr>" 
     return link
 
+# --- [ 以下是你原本的讀取功能 ] ---
 
 @app.route("/read2")
 def read2():
@@ -64,6 +65,8 @@ def read():
         Result += str(doc.to_dict()) + "<br>"    
     return Result + "<br><a href=/>返回首頁</a>"
 
+# --- [ 基礎頁面 ] ---
+
 @app.route("/mis")
 def course():
     return "<h1>資訊管理導論</h1><a href=/>返回首頁</a>"
@@ -77,6 +80,8 @@ def today():
 def me():
     now = datetime.now()
     return render_template("MIS2B411316337.html", datetime = str(now))
+
+# --- [ 傳值功能 ] ---
 
 @app.route("/welcome", methods=["GET"])
 def welcome():
@@ -97,17 +102,30 @@ def account():
 def count():
     return render_template("count.html")
 
-@app.route("/find")
+# --- [ 這裡是你指定的 find 整合部分 ] ---
+
+@app.route("/find", methods=["GET", "POST"])
 def find():
-    return "<h1>找老師頁面</h1><p>這是尚未實作的功能</p><a href=/>返回首頁</a>"
+    results = []
+    keyword = ""
+    if request.method == "POST":
+        # 接收 find.html 傳過來的關鍵字
+        keyword = request.form.get("keyword", "").strip()
+        if keyword:
+            collection_ref = db.collection("靜宜資管")
+            docs = collection_ref.get()
+            for doc in docs:
+                teacher = doc.to_dict()
+                if keyword in teacher.get("name", ""):
+                    results.append(teacher)
+    
+    # 渲染 find.html 並帶入搜尋結果
+    return render_template("find.html", results=results, keyword=keyword)
 
 @app.route("/teacher")
 def teacher():
     return "<h1>老師本學期的課程</h1><p>這是尚未實作的功能</p><a href=/>返回首頁</a>"
 
-
-
-
-# --- 啟動指令 (一定要有這段程式才會動) ---
+# --- 啟動指令 ---
 if __name__ == '__main__':
     app.run(debug=True)
