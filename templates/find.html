@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>靜宜資管老師查詢</title>
+    <title>找老師</title>
     <style>
         body { font-family: "Microsoft JhengHei", Arial, sans-serif; padding: 20px; line-height: 1.6; }
         .search-area { margin-bottom: 20px; }
@@ -30,12 +30,14 @@
 
     <div id="results">
         {% if keyword %}
+            <h3>查詢結果 (關鍵字: {{ keyword }}):</h3>
+            
             {% if results %}
                 {% for teacher in results %}
                     <div class="result-item">
-                        <strong>{{ teacher.name }}</strong>
-                        {% if teacher.title %} - {{ teacher.title }}{% endif %}
-                        {% if teacher.email %} ({{ teacher.email }}){% endif %}
+                        <span style="color: blue; font-weight: bold;">{{ teacher.name }}</span> 
+                        老師的研究室在 <strong>{{ teacher.lab }}</strong>
+                        {% if teacher.mail %} ({{ teacher.mail }}){% endif %}
                     </div>
                 {% endfor %}
             {% else %}
