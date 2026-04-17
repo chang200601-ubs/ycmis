@@ -94,7 +94,7 @@ def account():
 def count():
     return render_template("count.html")
 
-@app.route("/find", methods=["GET", "POST"])
+@app.route("/search", methods=["GET", "POST"])
 def find():
     results = []
     keyword = ""
