@@ -125,10 +125,12 @@ def teacher():
         soup = BeautifulSoup(resp.text, "html.parser")
 
         result = ""
+        seen = set()
         for a in soup.select("a"):
             href = a.get("href", "")
             name = a.get_text(strip=True)
-            if "drive.google.com" in href:
+            if "drive.google.com" in href and href not in seen:
+                seen.add(href)
                 result += name + href + "<br>"
 
         if result == "":
