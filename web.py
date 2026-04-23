@@ -4,6 +4,8 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from flask import Flask, render_template, request
 from datetime import datetime
+import requests
+from bs4 import BeautifulSoup
 
 # 1. Firebase 初始化
 if not firebase_admin._apps:
@@ -35,8 +37,30 @@ def index():
     link += "<a href=/read>讀取Firestore資料</a><hr>" 
     link += "<a href=/read2>讀取Firestore資料(關鍵字)</a><hr>" 
     link += "<a href=/search>找老師</a><hr>" 
-    link += "<a href=/teacher>老師本學期的課程</a><hr>" 
+    link += "<a href=/teacher>爬取老師本學期的課程</a><hr>"
+    link += "<a href=/movie>爬取即將上映的電影</a><hr>"
     return link
+
+@app.route("/movie")
+def movie():
+    url = "https://www.atmovies.com.tw/movie/next/"
+    Data = requests.get(url)
+    Data.encoding = "utf-8"
+    sp = BeautifulSoup(Data.text, "html.parser")
+    result = sp.select(".filmListAllX li")
+    
+    # 修正點 1：先初始化 R 為空字串
+    R = "" 
+    
+    for item in result:
+        # 這裡會不斷把電影資料加進 R 裡面
+        R += item.find("img").get("alt") + "<br>"
+        R += "https://www.atmovies.com.tw/" + item.find("a").get("href") + "<br>"
+        R += "https://www.atmovies.com.tw/" + item.find("img").get("src") + "<br>"
+    
+    # 修正點 2：將 return 移到迴圈外，等全部跑完再回傳
+    return R
+
 
 @app.route("/read2")
 def read2():
