@@ -39,6 +39,7 @@ def index():
     link += "<a href=/search>找老師</a><hr>" 
     link += "<a href=/teacher>爬取老師本學期的課程</a><hr>"
     link += "<a href=/movie>爬取即將上映的電影</a><hr>"
+    link += "<a href=/moviesearch>查詢即將上映的電影</a><hr>"
     return link
 
 @app.route("/movie")
@@ -49,17 +50,21 @@ def movie():
     sp = BeautifulSoup(Data.text, "html.parser")
     result = sp.select(".filmListAllX li")
     
-    # 修正點 1：先初始化 R 為空字串
     R = "" 
     
     for item in result:
-        # 這裡會不斷把電影資料加進 R 裡面
-        R += item.find("img").get("alt") + "<br>"
-        R += "https://www.atmovies.com.tw/" + item.find("a").get("href") + "<br>"
-        R += "https://www.atmovies.com.tw/" + item.find("img").get("src") + "<br>"
+        # 取得電影名稱、連結與圖片網址
+        title = item.find("img").get("alt")
+        movie_url = "https://www.atmovies.com.tw" + item.find("a").get("href")
+        img_url = "https://www.atmovies.com.tw" + item.find("img").get("src")
+        
+        # 組合 HTML 字串
+        R += f"<b>{title}</b><br>"
+        # 使用 <a href='...'> 標籤來建立超連結
+        R += f"<a href='{movie_url}' target='_blank'>{movie_url}</a><br>"
+        R += f"<a href='{img_url}' target='_blank'>{img_url}</a><br><br>"
     
-    # 修正點 2：將 return 移到迴圈外，等全部跑完再回傳
-    return R
+    return R + "<br><a href=/>返回首頁</a>"
 
 
 @app.route("/read2")
