@@ -38,8 +38,8 @@ def index():
     link += "<a href=/read2>讀取Firestore資料(關鍵字)</a><hr>" 
     link += "<a href=/search>找老師</a><hr>" 
     link += "<a href=/teacher>爬取老師本學期的課程</a><hr>"
-    link += "<a href=/movie>爬取即將上映的電影</a><hr>"
-    link += "<a href=/moviesearch>查詢即將上映的電影</a><hr>"
+    link += "<a href=/movie>電影連結資訊圖表</a><hr>"
+    link += "<a href=/moviesearch>爬取即將上映的電影</a><hr>"
     return link
 
 @app.route("/moviesearch", methods=["GET", "POST"])
@@ -75,16 +75,13 @@ def movie():
     R = "" 
     
     for item in result:
-        # 取得電影名稱、連結與圖片網址
         title = item.find("img").get("alt")
         movie_url = "https://www.atmovies.com.tw" + item.find("a").get("href")
         img_url = "https://www.atmovies.com.tw" + item.find("img").get("src")
         
-        # 組合 HTML 字串
         R += f"<b>{title}</b><br>"
-        # 使用 <a href='...'> 標籤來建立超連結
         R += f"<a href='{movie_url}' target='_blank'>{movie_url}</a><br>"
-        R += f"<a href='{img_url}' target='_blank'>{img_url}</a><br><br>"
+        R += f"<img src='{img_url}' width='100'><br><br>"  # 這行改掉
     
     return R + "<br><a href=/>返回首頁</a>"
 
