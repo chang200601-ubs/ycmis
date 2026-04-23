@@ -42,6 +42,28 @@ def index():
     link += "<a href=/moviesearch>查詢即將上映的電影</a><hr>"
     return link
 
+@app.route("/moviesearch", methods=["GET", "POST"])
+def moviesearch():
+    results = []
+    keyword = ""
+    if request.method == "POST":
+        keyword = request.form.get("keyword", "").strip()
+        if keyword:
+            url = "https://www.atmovies.com.tw/movie/next/"
+            Data = requests.get(url)
+            Data.encoding = "utf-8"
+            sp = BeautifulSoup(Data.text, "html.parser")
+            items = sp.select(".filmListAllX li")
+            for item in items:
+                title = item.find("img").get("alt")
+                if keyword in title:
+                    results.append({
+                        "title": title,
+                        "url": "https://www.atmovies.com.tw" + item.find("a").get("href"),
+                        "img": "https://www.atmovies.com.tw" + item.find("img").get("src")
+                    })
+    return render_template("moviesearch.html", results=results, keyword=keyword)
+
 @app.route("/movie")
 def movie():
     url = "https://www.atmovies.com.tw/movie/next/"
