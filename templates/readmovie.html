@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>查詢電影資料庫</title>
+</head>
+<body>
+  <h1>查詢即將上映電影（資料庫）</h1>
+  <form method="POST">
+    <input type="text" name="keyword" placeholder="輸入片名關鍵字" value="{{ keyword }}">
+    <button type="submit">搜尋</button>
+  </form>
+  <hr>
+
+  {% if keyword and results %}
+    <p>找到 {{ results|length }} 筆含有「{{ keyword }}」的電影：</p>
+    {% for m in results %}
+      <b>編號：</b>{{ m.id }}<br>
+      <b>片名：</b>{{ m.title }}<br>
+      <b>上映日期：</b>{{ m.showDate }}<br>
+      <a href="{{ m.hyperlink }}" target="_blank">介紹頁</a><br>
+      <img src="{{ m.picture }}" width="100"><br><br>
+    {% endfor %}
+  {% elif keyword %}
+    <p>找不到含有「{{ keyword }}」的電影</p>
+  {% endif %}
+
+  <a href="/">返回首頁</a>
+</body>
+</html>
