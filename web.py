@@ -41,8 +41,31 @@ def index():
     link += "<a href=/movie>電影連結資訊圖表</a><hr>"
     link += "<a href=/moviesearch>爬取即將上映的電影</a><hr>"
     link += "<a href=/spidermovie>讀取開眼電影即將上映影片，寫入Firestore</a><br><hr>"
+    link += "<a href=/readmovie> 輸入片名關鍵字,查詢資料庫符合的電影包含編號,片名,海報,介紹頁及上映日期</a><br><hr>"
 
     return link
+
+
+@app.route("/readmovie", methods=["GET", "POST"])
+def readmovie():
+    results = []
+    keyword = ""
+    if request.method == "POST":
+        keyword = request.form.get("keyword", "").strip()
+        if keyword:
+            collection_ref = db.collection("電影")
+            docs = collection_ref.get()
+            for doc in docs:
+                movie = doc.to_dict()
+                if keyword in movie.get("title", ""):
+                    results.append({
+                        "id": doc.id,               # 編號
+                        "title": movie.get("title", ""),
+                        "picture": movie.get("picture", ""),
+                        "hyperlink": movie.get("hyperlink", ""),
+                        "showDate": movie.get("showDate", "")
+                    })
+    return render_template("readmovie.html", results=results, keyword=keyword)
 
 @app.route("/spidermovie")
 def spidermovie():
@@ -79,8 +102,7 @@ def spidermovie():
         
     R+="最後更新日期" + lastUpdate + "<br>"
     R+="總共爬取"+str(total)+"部電影資料庫" +"<br>"
-    return R
-
+    return R + "<br><a href=/>返回首頁</a>"
 
 @app.route("/moviesearch", methods=["GET", "POST"])
 def moviesearch():
