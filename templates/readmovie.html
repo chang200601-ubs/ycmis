@@ -17,7 +17,7 @@
     {% for m in results %}
       <b>編號：</b>{{ m.id }}<br>
       <b>片名：</b>{{ m.title }}<br>
-      <b>上映日期：</b>{{ m.showDate }}<br>
+      <b>上映日期：</b>{{ m.showDate.replace("上映日期：", "") }}<br>
       <a href="{{ m.hyperlink }}" target="_blank">介紹頁</a><br>
       <img src="{{ m.picture }}" width="100"><br><br>
     {% endfor %}
