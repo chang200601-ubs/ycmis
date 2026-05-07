@@ -42,8 +42,24 @@ def index():
     link += "<a href=/moviesearch>爬取即將上映的電影</a><hr>"
     link += "<a href=/spidermovie>讀取開眼電影即將上映影片，寫入Firestore</a><br><hr>"
     link += "<a href=/readmovie> 輸入片名關鍵字,查詢資料庫符合的電影包含編號,片名,海報,介紹頁及上映日期</a><br><hr>"
-
+    link += "<a href=/rode>台中市十大肇事路口</a><br><hr>"
     return link
+
+
+
+@app.route("/rode")
+def rode():
+    R = "<h1>台中市十大肇事路口(113年10月)</h1><br>" 
+    url = "https://datacenter.taichung.gov.tw/swagger/OpenData/a1b899c0-511f-4e3d-b22b-814982a97e41"
+    headers={'User-Agent':'Mozilla/5.0'}
+    Data = requests.get(url,verify=False)
+    #print(Data.text)
+
+    JsonData = json.loads(Data.text)
+    for item in JsonData:
+        R+=item["路口名稱"] + ",原因：" + item["主要肇因"] + "<br>"
+
+    return R + "<br><a href=/>返回首頁</a>"
 
 
 @app.route("/readmovie", methods=["GET", "POST"])
