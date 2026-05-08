@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>天氣查詢</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; max-width: 700px; }
+  h1 { font-size: 1.4rem; margin-bottom: 16px; }
+  select, button { font-size: 1rem; padding: 6px 10px; margin-right: 8px; }
+  hr { margin: 16px 0; }
+  #result { margin-top: 16px; }
+  .card { border: 1px solid #ccc; border-radius: 6px; padding: 14px 18px; margin-bottom: 12px; }
+  .card h3 { margin: 0 0 8px; font-size: 1rem; color: #333; }
+  .card p { margin: 4px 0; font-size: 0.95rem; }
+  .error { color: red; }
+</style>
+</head>
+<body>
+
+<h1>天氣查詢</h1>
+
+<select id="citySelect">
+  <option value="">請選擇縣市…</option>
+  <option>基隆市</option><option>臺北市</option><option>新北市</option>
+  <option>桃園市</option><option>新竹市</option><option>新竹縣</option>
+  <option>苗栗縣</option><option>臺中市</option><option>彰化縣</option>
+  <option>南投縣</option><option>雲林縣</option><option>嘉義市</option>
+  <option>嘉義縣</option><option>臺南市</option><option>高雄市</option>
+  <option>屏東縣</option><option>宜蘭縣</option><option>花蓮縣</option>
+  <option>臺東縣</option><option>澎湖縣</option><option>金門縣</option>
+  <option>連江縣</option>
+</select>
+<button onclick="fetchWeather()">搜尋</button>
+
+<hr>
+<a href="/">返回首頁</a>
+
+<div id="result"></div>
+
+<script>
+const API_KEY = 'rdec-key-123-45678-011121314';
+
+// ✅ 改掉寫死的地方：根據時間自動產生標籤
+function getLabel(startTime) {
+  const date = new Date(startTime.replace(' ', 'T'));
+  const hour = date.getHours();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const period = (hour >= 6 && hour < 18) ? '白天' : '夜間';
+  return `${month}/${day} ${period}`;
+}
+
+async function fetchWeather() {
+  const city = document.getElementById('citySelect').value;
+  const result = document.getElementById('result');
+
+  if (!city) { result.innerHTML = '<p class="error">請先選擇縣市</p>'; return; }
+
+  result.innerHTML = '<p>載入中…</p>';
+
+  try {
+    const res = await fetch(
+      `https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=${API_KEY}&format=JSON&locationName=${encodeURIComponent(city)}`
+    );
+    const data = await res.json();
+    const loc = data?.records?.location?.[0];
+    if (!loc) throw new Error('找不到資料');
+
+    const wx   = loc.weatherElement.find(e => e.elementName === 'Wx');
+    const pop  = loc.weatherElement.find(e => e.elementName === 'PoP');
+    const minT = loc.weatherElement.find(e => e.elementName === 'MinT');
+    const maxT = loc.weatherElement.find(e => e.elementName === 'MaxT');
+
+    let html = `<h2>${loc.locationName} 天氣預報</h2>`;
+
+    wx.time.forEach((t, i) => {
+      const label = getLabel(t.startTime);   // ✅ 動態標籤
+      const desc  = t.parameter?.parameterName ?? '—';
+      const rain  = pop?.time[i]?.parameter?.parameterName ?? '—';
+      const lo    = minT?.time[i]?.parameter?.parameterName ?? '—';
+      const hi    = maxT?.time[i]?.parameter?.parameterName ?? '—';
+      const start = t.startTime.replace('T', ' ').slice(0, 16);
+      const end   = t.endTime.replace('T', ' ').slice(0, 16);
+
+      html += `
+        <div class="card">
+          <h3>${label}&nbsp;&nbsp;<small style="color:#666;font-weight:normal">${start} ～ ${end}</small></h3>
+          <p>天氣：${desc}</p>
+          <p>溫度：${lo}°C ～ ${hi}°C</p>
+          <p>降雨機率：${rain}%</p>
+        </div>`;
+    });
+
+    result.innerHTML = html;
+  } catch (e) {
+    result.innerHTML = `<p class="error">查詢失敗：${e.message}</p>`;
+  }
+}
+</script>
+</body>
+</html>
