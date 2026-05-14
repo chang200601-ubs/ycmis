@@ -138,7 +138,6 @@ def road():
 
     return R + "<br><a href=/>返回首頁</a>"
 
-
 @app.route("/readmovie", methods=["GET", "POST"])
 def readmovie():
     results = []
