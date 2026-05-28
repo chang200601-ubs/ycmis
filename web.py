@@ -7,6 +7,7 @@ from flask import Flask, render_template, request,make_response, jsonify
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
+from google.genai import types
 
 # 1. Firebase 初始化
 if not firebase_admin._apps:
@@ -27,7 +28,6 @@ db = firestore.client()
 app = Flask(__name__)
 
 client = genai.Client()
-
 
 @app.route("/")
 def index():
@@ -50,7 +50,24 @@ def index():
     link += "<a href=/weather>天氣查詢</a><br><hr>"    
     link +="<a href=/rate>本周新片進DB</a><br><hr>" 
     link +="<a href=/webdemo>電影聊天機器人</a><br><hr>" 
+    link +="<a href=/ask>AI</a><br><hr>" 
+    link +="<a href=/ask>問問題</a><br><hr>" 
+
     return link
+
+@app.route("/webhook7", methods=["POST"])
+def webhook7():
+    # build a request object
+    req = request.get_json(force=True)
+    # fetch queryResult from json
+    action =  req.get("queryResult").get("action")
+    #msg =  req.get("queryResult").get("queryText")
+    #info = "動作：" + action + "； 查詢內容：" + msg
+    if (action == "rateChoice"):
+…
+    elif (action == "input.unknown"):
+        info =  req["queryResult"]["queryText"]
+    return make_response(jsonify({"fulfillmentText": info}))
 
 @app.route('/ask', methods=['GET', 'POST']) 
 def ask():
